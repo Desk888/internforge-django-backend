@@ -9,6 +9,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150)
     date_of_birth = models.DateField(null=True, blank=True)
     email_address = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)  # Django handles password hashing
     phone_number = models.CharField(max_length=20, blank=True)
     address_line_one = models.CharField(max_length=255, blank=True)
     address_line_two = models.CharField(max_length=255, blank=True)
@@ -17,6 +18,7 @@ class User(AbstractUser):
     postcode = models.CharField(max_length=20, blank=True)
     job_title = models.CharField(max_length=100, blank=True)
     current_company = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     user_type = models.CharField(max_length=20, choices=[('SEEKER', 'Job Seeker'), ('EMPLOYER', 'Employer'), ('ADMIN', 'Admin')], default='SEEKER')
     is_active = models.BooleanField(default=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
