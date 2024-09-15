@@ -20,6 +20,11 @@ erDiagram
         string job_title
         string current_company
         datetime created_at
+        enum user_type "New field"
+        boolean is_active "New field"
+        string profile_picture "New field"
+        text bio "New field"
+        datetime last_login "New field"
     }
     
     COMPANY ||--o{ JOB : posts
@@ -36,6 +41,10 @@ erDiagram
         string industry
         datetime created_at
         int user_id FK
+        string logo "New field"
+        int employee_count "New field"
+        year founded_year "New field"
+        enum company_status "New field"
     }
     
     JOB ||--o{ APPLICATION : receives
@@ -50,6 +59,10 @@ erDiagram
         string salary
         datetime created_at
         enum status
+        date application_deadline "New field"
+        int number_of_openings "New field"
+        boolean is_remote "New field"
+        string experience_level "New field"
     }
     
     CV ||--o{ APPLICATION : used_in
@@ -60,6 +73,7 @@ erDiagram
         string file_path
         datetime uploaded_at
         boolean is_active
+        string version "New field"
     }
     
     APPLICATION {
@@ -70,6 +84,8 @@ erDiagram
         string cover_letter
         enum status
         datetime submitted_at
+        datetime last_updated "New field"
+        text interviewer_notes "New field"
     }
     
     SKILL }o--o{ USER : has
@@ -78,18 +94,21 @@ erDiagram
         int skill_id PK
         string name
         string description
+        enum category "New field"
     }
     
     USER_SKILL {
         int user_id FK
         int skill_id FK
         int proficiency_level
+        date acquired "New field"
     }
     
     JOB_SKILL {
         int job_id FK
         int skill_id FK
         boolean is_required
+        int importance_level "New field"
     }
     
     NOTIFICATION {
@@ -97,6 +116,8 @@ erDiagram
         int user_id FK
         boolean is_read
         datetime created_at
+        string message "New field"
+        enum notification_type "New field"
     }
     
     SEARCH_LOG {
@@ -104,4 +125,5 @@ erDiagram
         int user_id FK
         string query
         datetime searched_at
+        int results_count "New field"
     }
