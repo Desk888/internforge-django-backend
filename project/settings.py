@@ -65,6 +65,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# UPDATE THESE VALUES WITH YOUR EMAIL CONFIGURATION - TBC
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.your-email-provider.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@example.com'
+EMAIL_HOST_PASSWORD = 'your-email-password'
+
+# UPDATE THESE VALUES WITH YOUR FRONTEND CONFIGURATION - TBC
+FRONTEND_URL = ''
+
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
