@@ -1,6 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import MinValueValidator, MaxValueValidator
+from apps.users import constants
 import uuid
 
 class User(AbstractUser):
@@ -22,10 +23,17 @@ class User(AbstractUser):
     job_title = models.CharField(max_length=100, blank=True)
     current_company = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    user_type = models.CharField(max_length=20, choices=[('SEEKER', 'Job Seeker'), ('EMPLOYER', 'Employer'), ('ADMIN', 'Admin')], default='SEEKER')
+    user_type = models.CharField(max_length=20, choices=constants.USER_TYPE_CHOICES, default='SEEKER')
     is_active = models.BooleanField(default=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     bio = models.TextField(blank=True)
+    
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        super().save(*args, **kwargs)
+        if creating:
+            group, created = Group.objects.get_or_create(name=self.user_type)
+            self.groups.add(group)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email_address})"
