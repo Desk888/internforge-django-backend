@@ -1,3 +1,9 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from apps.cvs.models import CV
+from apps.cvs.serializers import CVSerializer
 
-# Create your views here.
+class CVViewSet(viewsets.ModelViewSet):
+    queryset = CV.objects.all()
+    serializer_class = CVSerializer
+    permission_classes = [IsAuthenticated]
