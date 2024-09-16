@@ -11,8 +11,8 @@ class User(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)
     email_address = models.EmailField(unique=True)
     email_verified = models.BooleanField(default=False)
-    email_verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
-    password = models.CharField(max_length=128)  # Django handles password hashing
+    email_verification_token = models.UUIDField(default=uuid.uuid4, editable=False, null=True, unique=True),
+    password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=20, blank=True)
     address_line_one = models.CharField(max_length=255, blank=True)
     address_line_two = models.CharField(max_length=255, blank=True)
@@ -39,7 +39,6 @@ class User(AbstractUser):
         related_query_name='custom_user',
     )
 
-    # Override the user_permissions field
     user_permissions = models.ManyToManyField(
         'auth.Permission',
         verbose_name='user permissions',

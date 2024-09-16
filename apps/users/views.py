@@ -32,10 +32,9 @@ class UserCreateView(generics.CreateAPIView):
         self.send_verification_email(user)
 
     def send_verification_email(self, user):
-        # Generate verification URL
-        verification_url = f"{settings.FRONTEND_URL}/verify-email/{user.email_verification_token}"
-        
-        # Send verification email
+        if not user.email_verified:
+            verification_url = f"{settings.FRONTEND_URL}/verify-email/{user.email_verification_token}"
+
         send_mail(
             'Verify your email',
             f'Please click this link to verify your email: {verification_url}',
@@ -52,6 +51,7 @@ class VerifyEmailView(APIView):
             user = User.objects.get(email_verification_token=token)
             if not user.email_verified:
                 user.email_verified = True
+                user.email_verification_token = None
                 user.save()
                 return Response({"message": "Email successfully verified."}, status=status.HTTP_200_OK)
             else:
@@ -70,14 +70,11 @@ class PasswordResetView(generics.GenericAPIView):
         
         try:
             user = User.objects.get(email=email)
-            # Generate password reset token
             token = PasswordResetTokenGenerator().make_token(user)
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             
-            # Generate password reset URL
             reset_url = f"{settings.FRONTEND_URL}/reset-password/{uidb64}/{token}"
             
-            # Send password reset email
             send_mail(
                 'Reset your password',
                 f'Please click this link to reset your password: {reset_url}',
