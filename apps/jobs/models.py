@@ -1,21 +1,31 @@
 from django.db import models
 from apps.companies.models import Company
+from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
+from apps.jobs.constants import CONTRACT_TYPE_CHOICES, EXPERIENCE_LEVEL_CHOICES, STATUS_CHOICES
 
 class Job(models.Model):
     job_id = models.BigAutoField(primary_key=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='jobs')
+    company_name = models.CharField(max_length=255, default='Unspecified Company')
     title = models.CharField(max_length=255)
     description = models.TextField()
     location = models.CharField(max_length=255)
-    contract_type = models.CharField(max_length=20, choices=[('FULL_TIME', 'Full Time'), ('PART_TIME', 'Part Time'), ('CONTRACT', 'Contract'), ('INTERNSHIP', 'Internship')])
+    contract_type = models.CharField(max_length=20, choices=CONTRACT_TYPE_CHOICES)
     requirements = models.TextField()
     salary = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[('OPEN', 'Open'), ('CLOSED', 'Closed'), ('DRAFT', 'Draft')], default='OPEN')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
     application_deadline = models.DateField()
     number_of_openings = models.PositiveIntegerField(default=1)
     is_remote = models.BooleanField(default=False)
-    experience_level = models.CharField(max_length=20, choices=[('ENTRY', 'Entry Level'), ('MID', 'Mid Level'), ('SENIOR', 'Senior Level')])
+    experience_level = models.CharField(max_length=20, choices=EXPERIENCE_LEVEL_CHOICES)
+    search_vector = SearchVectorField(null=True, blank=True)
+    
+    class Meta:
+        indexes = [
+            GinIndex(fields=['search_vector'])
+        ]
 
     def __str__(self):
         return f"{self.title} at {self.company.company_name}"

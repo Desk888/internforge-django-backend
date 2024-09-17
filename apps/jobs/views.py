@@ -5,6 +5,11 @@ from apps.skills.models import JobSkill
 from .serializers import JobSerializer
 from apps.skills.serializers import JobSkillSerializer
 from apps.users.permissions import IsEmployer, IsAdmin
+from apps.search.models import SearchLog
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
@@ -37,3 +42,25 @@ class JobSkillViewSet(viewsets.ModelViewSet):
     queryset = JobSkill.objects.all()
     serializer_class = JobSkillSerializer
     permission_classes = [IsAuthenticated]
+    
+class JobSearchView(APIView):
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        if not query:
+            return Response({"error": "Please provide a search query"}, status=400)
+
+        search_vector = SearchVector('title', weight='A') + \
+                        SearchVector('company_name', weight='B') + \
+                        SearchVector('description', weight='C') + \
+                        SearchVector('requirements', weight='C') + \
+                        SearchVector('location', weight='D')
+
+        search_query = SearchQuery(query, config='english')
+        search_rank = SearchRank(search_vector, search_query)
+
+        jobs = Job.objects.annotate(
+            rank=search_rank
+        ).filter(rank__gte=0.1).order_by('-rank')
+
+        serializer = JobSerializer(jobs, many=True)
+        return Response(serializer.data)
