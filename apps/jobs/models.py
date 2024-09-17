@@ -2,6 +2,7 @@ from django.db import models
 from apps.companies.models import Company
 from django.contrib.postgres.search import SearchVectorField
 from django.contrib.postgres.indexes import GinIndex
+from django.utils import timezone
 from apps.jobs.constants import CONTRACT_TYPE_CHOICES, EXPERIENCE_LEVEL_CHOICES, STATUS_CHOICES
 
 class Job(models.Model):
@@ -29,3 +30,12 @@ class Job(models.Model):
 
     def __str__(self):
         return f"{self.title} at {self.company.company_name}"
+    
+    def is_open(self):
+        if self.application_deadline is None:
+            return False
+        return (
+            self.status == 'OPEN' and 
+            self.application_deadline > timezone.now().date() and
+            not self.applications_closed
+        )
