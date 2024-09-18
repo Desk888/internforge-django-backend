@@ -11,10 +11,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from apps.notifications.service import NotificationService
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import JobFilter
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+    filterset_class = JobFilter
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['title', 'description', 'company__name', 'location']
+    ordering_fields = ['created_at', 'salary', 'title']
+    ordering = ['-created_at']  # Default ordering
     permission_classes = [IsAuthenticated]
     
     def get_permissions(self):

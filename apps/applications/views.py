@@ -6,12 +6,19 @@ from apps.applications.models import Application
 from apps.applications.serializers import ApplicationSerializer
 from apps.users.permissions import IsJobSeeker, IsEmployer, IsAdmin
 from apps.notifications.service import NotificationService
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import ApplicationFilter
 
 
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
+    filterset_class = ApplicationFilter
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    ordering_fields = ['submitted_at', 'last_updated', 'created_at']
+    ordering = ['-submitted_at']
     
     def get_permissions(self):
         if self.action == 'create':
