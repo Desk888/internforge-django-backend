@@ -5,4 +5,4 @@
 3. Setup Nginx for Frontend
 4. Setup PostgreSQL for Database on Supabase
 5. Setup Redis for Celery Tasks on RDS
-6. Create Bucket on for Media Storage on Supabase
+6. Create Bucket on for Media Storage on Supabase or S3
