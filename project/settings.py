@@ -139,6 +139,11 @@ USE_I18N = True
 
 USE_TZ = True
 
+# File Upload Settings
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

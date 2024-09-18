@@ -17,7 +17,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filterset_class = ApplicationFilter
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    ordering_fields = ['submitted_at', 'last_updated', 'created_at']
+    ordering_fields = ['submitted_at', 'last_updated']
     ordering = ['-submitted_at']
     
     def get_permissions(self):

@@ -14,6 +14,7 @@ from apps.notifications.service import NotificationService
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import JobFilter
+from rest_framework import serializers
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
@@ -27,20 +28,16 @@ class JobViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            self.permission_classes = [IsAuthenticated, (IsEmployer | IsAdmin)]
-        return super().get_permissions()
+            return [IsAuthenticated(), IsEmployer() | IsAdmin()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
-        job = serializer.save()
+        if hasattr(self.request.user, 'company'):
+            serializer.save(company=self.request.user.company)
+        else:
+            raise serializers.ValidationError("User does not have an associated company.")
+        job = serializer.instance
         NotificationService.notify_new_job_posted(job)
-        
-    def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            self.permission_classes = [IsAuthenticated, (IsEmployer | IsAdmin)]
-        return super().get_permissions()
-
-    def perform_create(self, serializer):
-        serializer.save(company=self.request.user.company)
 
     def check_object_permissions(self, request, obj):
         super().check_object_permissions(request, obj)
@@ -71,6 +68,12 @@ class JobSearchView(APIView):
         jobs = Job.objects.annotate(
             rank=search_rank
         ).filter(rank__gte=0.1).order_by('-rank')
+
+        SearchLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            query=query,
+            results_count=len(jobs)
+        )
 
         serializer = JobSerializer(jobs, many=True)
         return Response(serializer.data)
