@@ -160,10 +160,30 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 CELERY_BEAT_SCHEDULE = {
-    'update-search-vectors-every-hour': {
-        'task': 'apps.jobs.tasks.update_search_vectors',
-        'schedule': timedelta(hours=1),
+    # Analytics tasks
+    'process-daily-stats': {
+        'task': 'apps.analytics.tasks.process_daily_stats',
+        'schedule': timedelta(days=1),  # Run daily at midnight
     },
+
+    # Search tasks
+    'update-search-vectors': {
+        'task': 'apps.jobs.tasks.update_search_vectors',
+        'schedule': timedelta(hours=4),  # Run every 4 hours
+    },
+
+    # Notification tasks
+    'clean-old-notifications': {
+        'task': 'apps.notifications.tasks.clean_old_notifications',
+        'schedule': timedelta(days=1),  # Run daily
+    },
+
+    # The following tasks are event-driven and don't need to be scheduled:
+    # - create_notification
+    # - notify_application_status_change
+    # - notify_new_job_posted
+    # - notify_application_received
+    # These will be called by other parts of the application when needed.
 }
 
 LOGGING = {

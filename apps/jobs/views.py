@@ -15,6 +15,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import JobFilter
 from rest_framework import serializers
+from apps.analytics.service import AnalyticsService
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
@@ -44,6 +45,11 @@ class JobViewSet(viewsets.ModelViewSet):
         if self.action in ['update', 'partial_update', 'destroy']:
             if not request.user.is_staff and obj.company != request.user.company:
                 self.permission_denied(request)
+    
+    def retrieve(self, request, *args, **kwargs):
+        job = self.get_object()
+        AnalyticsService.track_event('job_view', user=request.user, obj=job)
+        return super().retrieve(request, *args, **kwargs)
 
 class JobSkillViewSet(viewsets.ModelViewSet):
     queryset = JobSkill.objects.all()

@@ -9,6 +9,7 @@ from apps.notifications.service import NotificationService
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ApplicationFilter
+from apps.analytics.service import AnalyticsService
 
 
 class ApplicationViewSet(viewsets.ModelViewSet):
@@ -74,3 +75,9 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             'ACCEPTED': ['REJECTED']
         }
         return new_status in valid_transitions.get(old_status, [])
+    
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        if response.status_code == 201:
+            AnalyticsService.track_event('job_application', user=request.user, obj=response.data['job'])
+        return response

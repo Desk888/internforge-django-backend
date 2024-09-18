@@ -11,11 +11,18 @@ from .models import User
 from apps.skills.models import UserSkill
 from .serializers import UserSerializer, UserCreateSerializer, PasswordResetSerializer, SetNewPasswordSerializer
 from apps.skills.serializers import UserSkillSerializer
+from apps.analytics.service import AnalyticsService
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        if response.status_code == 201:
+            AnalyticsService.track_event('user_registration', user=response.data['id'])
+        return response
 
 class UserSkillViewSet(viewsets.ModelViewSet):
     queryset = UserSkill.objects.all()
