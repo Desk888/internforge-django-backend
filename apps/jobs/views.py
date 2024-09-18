@@ -10,6 +10,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from apps.notifications.service import NotificationService
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
@@ -22,7 +23,8 @@ class JobViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def perform_create(self, serializer):
-        serializer.save(company=self.request.user.company)
+        job = serializer.save()
+        NotificationService.notify_new_job_posted(job)
         
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:

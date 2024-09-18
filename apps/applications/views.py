@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from apps.applications.models import Application
 from apps.applications.serializers import ApplicationSerializer
 from apps.users.permissions import IsJobSeeker, IsEmployer, IsAdmin
+from apps.notifications.service import NotificationService
+
 
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = Application.objects.all()
@@ -28,7 +30,14 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             return Application.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, status='PENDING')
+        application = serializer.save(user=self.request.user, status='PENDING')
+        NotificationService.notify_application_received(application)
+
+    def perform_update(self, serializer):
+        old_status = self.get_object().status
+        application = serializer.save()
+        if application.status != old_status:
+            NotificationService.notify_application_status_change(application)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
