@@ -4,22 +4,21 @@ from dotenv import load_dotenv
 from datetime import timedelta
 from project.celery import CELERY_LOG_FILE
 
+# Load environment variables
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the project like this: BASE_DIR / 'subdir'
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DRF_SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = ['*'] # Update with your allowed hosts in production
+ROOT_URLCONF = 'project.urls'
+WSGI_APPLICATION = 'project.wsgi.application'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -45,22 +44,6 @@ INSTALLED_APPS = [
     'apps.search',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ), 
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,  # You can adjust this number as needed
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-}
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -70,19 +53,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# UPDATE THESE VALUES WITH YOUR EMAIL CONFIGURATION - TBC
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.your-email-provider.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@example.com'
-EMAIL_HOST_PASSWORD = 'your-email-password'
-
-# UPDATE THESE VALUES WITH YOUR FRONTEND CONFIGURATION - TBC
-FRONTEND_URL = ''
-
-ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
     {
@@ -100,12 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# Database settings
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -117,76 +82,82 @@ DATABASES = {
     }
 }
 
+# Authentication and authorization
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.your-email-provider.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@example.com'
+EMAIL_HOST_PASSWORD = 'your-email-password'
+
+# Frontend URL
+FRONTEND_URL = ''
+
+# Internationalization
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-# File Upload Settings
-
+# File upload settings
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
+# Static files
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CELERY_BROKER_URL = os.getenv('REDIS_CONN')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_CONN')
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+# # Celery settings
+# CELERY_BROKER_URL = os.getenv('REDIS_CONN')
+# CELERY_RESULT_BACKEND = os.getenv('REDIS_CONN')
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'UTC'
+# print(f"CELERY_BROKER_URL: {CELERY_BROKER_URL}") 
 
 CELERY_BEAT_SCHEDULE = {
-    # Analytics tasks
     'process-daily-stats': {
         'task': 'apps.analytics.tasks.process_daily_stats',
-        'schedule': timedelta(days=1),  # Run daily at midnight
+        'schedule': timedelta(days=1),
     },
-
-    # Search tasks
     'update-search-vectors': {
         'task': 'apps.jobs.tasks.update_search_vectors',
-        'schedule': timedelta(hours=4),  # Run every 4 hours
+        'schedule': timedelta(hours=4),
     },
-
-    # Notification tasks
     'clean-old-notifications': {
         'task': 'apps.notifications.tasks.clean_old_notifications',
-        'schedule': timedelta(days=1),  # Run daily
+        'schedule': timedelta(days=1),
     },
-
-    # The following tasks are event-driven and don't need to be scheduled:
-    # - create_notification
-    # - notify_application_status_change
-    # - notify_new_job_posted
-    # - notify_application_received
-    # These will be called by other parts of the application when needed.
 }
 
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -212,6 +183,7 @@ LOGGING = {
     },
 }
 
-from apps.jobs.tasks import update_search_vectors
-result = update_search_vectors.delay()
-print(result.status)
+# # Task execution
+# from apps.jobs.tasks import update_search_vectors
+# result = update_search_vectors.delay()
+# print(result.status)

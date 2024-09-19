@@ -11,9 +11,9 @@ The following is a detailed plan outlining the implementation of this project us
 7. Create Job Application Process - Completed
 9. Add Filtering and Pagination - Completed
 10. Implement CV Upload and Management - Completed
-11. Create Dashboard Views
-12. Implement Analytics
-13. Add Tests
+11. Create Dashboard Views - Completed
+12. Implement Analytics - Completed
+13. Add Tests - Completed
 14. Optimize Performance
 15. Set up Deployment
 16. Implement Frontend

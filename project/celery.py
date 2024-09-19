@@ -1,7 +1,8 @@
 import os
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings.base')
+environment = os.environ.get('DJANGO_ENVIRONMENT', 'development')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'project.settings.{environment}')
 
 app = Celery('project')
 
