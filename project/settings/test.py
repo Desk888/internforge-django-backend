@@ -37,5 +37,3 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
 }
-
-# Add any other test-specific settings here
