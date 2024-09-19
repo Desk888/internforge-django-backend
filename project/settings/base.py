@@ -19,7 +19,7 @@ SECRET_KEY = os.getenv('DRF_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] # Update with your allowed hosts in production
 
 INSTALLED_APPS = [
     'django.contrib.admin',
