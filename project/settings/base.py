@@ -133,14 +133,14 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# # Celery settings
-# CELERY_BROKER_URL = os.getenv('REDIS_CONN')
-# CELERY_RESULT_BACKEND = os.getenv('REDIS_CONN')
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'UTC'
-# print(f"CELERY_BROKER_URL: {CELERY_BROKER_URL}") 
+# Celery settings
+CELERY_BROKER_URL = os.getenv('REDIS_CONN')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_CONN')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+print(f"CELERY_BROKER_URL: {CELERY_BROKER_URL}") 
 
 CELERY_BEAT_SCHEDULE = {
     'process-daily-stats': {
@@ -182,8 +182,3 @@ LOGGING = {
         },
     },
 }
-
-# # Task execution
-# from apps.jobs.tasks import update_search_vectors
-# result = update_search_vectors.delay()
-# print(result.status)
