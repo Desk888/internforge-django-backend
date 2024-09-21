@@ -1,9 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from apps.users.models import User
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -14,7 +13,8 @@ class UserViewSetTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user_data = {
-            'email': 'testuser@example.com',
+            'username': 'testuser',
+            'email_address': 'testuser@example.com',
             'password': 'testpass123',
             'first_name': 'Test',
             'last_name': 'User',
@@ -26,7 +26,8 @@ class UserViewSetTest(TestCase):
     def test_create_user(self):
         url = reverse('user-list')
         data = {
-            'email': 'newuser@example.com',
+            'username': 'newuser',
+            'email_address': 'newuser@example.com',
             'password': 'newpass123',
             'first_name': 'New',
             'last_name': 'User',
@@ -40,7 +41,7 @@ class UserViewSetTest(TestCase):
         url = reverse('user-detail', args=[self.user.pk])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email'], self.user.email)
+        self.assertEqual(response.data['email_address'], self.user.email_address)
 
     def test_update_user(self):
         url = reverse('user-detail', args=[self.user.pk])
@@ -63,7 +64,8 @@ class UserCreateViewTest(TestCase):
     def test_user_registration(self):
         url = reverse('user-register')
         data = {
-            'email': 'newuser@example.com',
+            'username': 'newuser',
+            'email_address': 'newuser@example.com',
             'password': 'newpass123',
             'password2': 'newpass123',
             'first_name': 'New',
@@ -71,12 +73,13 @@ class UserCreateViewTest(TestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(User.objects.filter(email='newuser@example.com').exists())
+        self.assertTrue(User.objects.filter(username='newuser').exists())
 
     def test_user_registration_password_mismatch(self):
         url = reverse('user-register')
         data = {
-            'email': 'newuser@example.com',
+            'username': 'newuser',
+            'email_address': 'newuser@example.com',
             'password': 'newpass123',
             'password2': 'differentpass',
             'first_name': 'New',
@@ -89,7 +92,8 @@ class VerifyEmailViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
-            email='testuser@example.com',
+            username='testuser',
+            email_address='testuser@example.com',
             password='testpass123',
             first_name='Test',
             last_name='User'
@@ -109,26 +113,27 @@ class VerifyEmailViewTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-# Add these tests to the existing test_views.py file
-
 class PasswordResetViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
-            email='testuser@example.com',
-            password='testpass123'
+            username='testuser',
+            email_address='testuser@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User'
         )
 
     def test_password_reset_request(self):
         url = reverse('password-reset')
-        data = {'email': 'testuser@example.com'}
+        data = {'email_address': 'testuser@example.com'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['message'], "Password reset email has been sent.")
 
     def test_password_reset_invalid_email(self):
         url = reverse('password-reset')
-        data = {'email': 'nonexistent@example.com'}
+        data = {'email_address': 'nonexistent@example.com'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -136,8 +141,11 @@ class SetNewPasswordViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
-            email='testuser@example.com',
-            password='testpass123'
+            username='testuser',
+            email_address='testuser@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User'
         )
         self.uid = urlsafe_base64_encode(force_bytes(self.user.pk))
         self.token = PasswordResetTokenGenerator().make_token(self.user)
