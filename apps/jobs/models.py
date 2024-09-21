@@ -10,14 +10,14 @@ class Job(models.Model):
     job_id = models.BigAutoField(primary_key=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='jobs')
     company_name = models.CharField(max_length=255, default='Unspecified Company')
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField()
-    location = models.CharField(max_length=255)
+    location = models.CharField(max_length=255, db_index=True)
     contract_type = models.CharField(max_length=20, choices=CONTRACT_TYPE_CHOICES)
     requirements = models.TextField()
     salary = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN', db_index=True)
     application_deadline = models.DateField()
     number_of_openings = models.PositiveIntegerField(default=1)
     is_remote = models.BooleanField(default=False)
@@ -26,7 +26,9 @@ class Job(models.Model):
     
     class Meta:
         indexes = [
-            GinIndex(fields=['search_vector'])
+            GinIndex(fields=['search_vector']),
+            models.Index(fields=['created_at', 'status']),
+            models.Index(fields=['location', 'contract_type']),
         ]
 
     def __str__(self):

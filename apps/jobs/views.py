@@ -10,21 +10,21 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from apps.notifications.service import NotificationService
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import JobFilter
-from rest_framework import serializers
-from apps.analytics.service import AnalyticsService
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from django.utils.decorators import method_decorator
 
 class JobViewSet(viewsets.ModelViewSet):
-    queryset = Job.objects.all()
+    queryset = Job.objects.all().select_related('company').prefetch_related('required_skills__skill')
     serializer_class = JobSerializer
     filterset_class = JobFilter
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['title', 'description', 'company__name', 'location']
     ordering_fields = ['created_at', 'salary', 'title']
-    ordering = ['-created_at']  # Default ordering
+    ordering = ['-created_at']
     permission_classes = [IsAuthenticated]
     
     def get_permissions(self):
@@ -32,24 +32,18 @@ class JobViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated(), IsEmployer() | IsAdmin()]
         return [IsAuthenticated()]
 
-    def perform_create(self, serializer):
-        if hasattr(self.request.user, 'company'):
-            serializer.save(company=self.request.user.company)
-        else:
-            raise serializers.ValidationError("User does not have an associated company.")
-        job = serializer.instance
-        NotificationService.notify_new_job_posted(job)
+    @method_decorator(cache_page(60 * 15))  # Cache for 15 minutes
+    @method_decorator(vary_on_cookie)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
-    def check_object_permissions(self, request, obj):
-        super().check_object_permissions(request, obj)
-        if self.action in ['update', 'partial_update', 'destroy']:
-            if not request.user.is_staff and obj.company != request.user.company:
-                self.permission_denied(request)
-    
+    @method_decorator(cache_page(60 * 60))  # Cache for 1 hour
+    @method_decorator(vary_on_cookie)
     def retrieve(self, request, *args, **kwargs):
-        job = self.get_object()
-        AnalyticsService.track_event('job_view', user=request.user, obj=job)
         return super().retrieve(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(company=self.request.user.company)
 
 class JobSkillViewSet(viewsets.ModelViewSet):
     queryset = JobSkill.objects.all()
