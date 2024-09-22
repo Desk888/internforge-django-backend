@@ -1,0 +1,867 @@
+{
+	"info": {
+		"name": "Job Board API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response contains user data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.eql(pm.environment.get(\"user_email\"));",
+									"    pm.expect(jsonData.first_name).to.eql(\"John\");",
+									"    pm.expect(jsonData.last_name).to.eql(\"Doe\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\",\n    \"password2\": \"{{user_password}}\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains access and refresh tokens\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.access).to.be.a('string');",
+									"    pm.expect(jsonData.refresh).to.be.a('string');",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.refresh);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains new access token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.access).to.be.a('string');",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/refresh/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"token",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs",
+			"item": [
+				{
+					"name": "Create Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response contains job data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.title).to.eql(\"Software Engineer\");",
+									"    pm.expect(jsonData.company).to.be.a('string');",
+									"    pm.environment.set(\"job_id\", jsonData.job_id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Software Engineer\",\n    \"description\": \"We are looking for a skilled software engineer.\",\n    \"location\": \"San Francisco, CA\",\n    \"salary\": \"$100,000 - $150,000\",\n    \"requirements\": \"5+ years of experience in software development\",\n    \"application_deadline\": \"2024-12-31\",\n    \"contract_type\": \"FULL_TIME\",\n    \"experience_level\": \"MID\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/jobs/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Jobs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains jobs array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.results).to.be.an('array');",
+									"    pm.expect(jsonData.results.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct job data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.job_id).to.eql(parseInt(pm.environment.get(\"job_id\")));",
+									"    pm.expect(jsonData.title).to.eql(\"Software Engineer\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs/{{job_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"{{job_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Applications",
+			"item": [
+				{
+					"name": "Apply for Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response contains application data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.job).to.eql(parseInt(pm.environment.get(\"job_id\")));",
+									"    pm.expect(jsonData.status).to.eql(\"PENDING\");",
+									"    pm.environment.set(\"application_id\", jsonData.application_id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"job\": {{job_id}},\n    \"cover_letter\": \"I am excited to apply for this position.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/applications/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"applications",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Applications",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains applications array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.results).to.be.an('array');",
+									"    pm.expect(jsonData.results.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/applications/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"applications",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Search Jobs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains search results\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/jobs/search/?q=software",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"jobs",
+								"search",
+								""
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "software"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Job Seeker Dashboard",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains job seeker dashboard data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.total_applications).to.be.a('number');",
+									"    pm.expect(jsonData.pending_applications).to.be.a('number');",
+									"    pm.expect(jsonData.accepted_applications).to.be.a('number');",
+									"    pm.expect(jsonData.rejected_applications).to.be.a('number');",
+									"    pm.expect(jsonData.recent_applications).to.be.an('array');",
+									"    pm.expect(jsonData.recommended_jobs).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/job-seeker/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"job-seeker",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employer Dashboard",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains employer dashboard data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.total_jobs_posted).to.be.a('number');",
+									"    pm.expect(jsonData.active_jobs).to.be.a('number');",
+									"    pm.expect(jsonData.total_applications).to.be.a('number');",
+									"    pm.expect(jsonData.applications_by_status).to.be.an('array');",
+									"    pm.expect(jsonData.recent_applications).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/employer/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"employer",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Admin Dashboard",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains admin dashboard data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.total_users).to.be.a('number');",
+									"    pm.expect(jsonData.total_companies).to.be.a('number');",
+									"    pm.expect(jsonData.total_jobs).to.be.a('number');",
+									"    pm.expect(jsonData.total_applications).to.be.a('number');",
+									"    pm.expect(jsonData.users_by_type).to.be.an('array');",
+									"    pm.expect(jsonData.jobs_by_status).to.be.an('array');",
+									"    pm.expect(jsonData.applications_by_status).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/admin/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"admin",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains user profile data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.email).to.be.a('string');",
+									"    pm.expect(jsonData.first_name).to.be.a('string');",
+									"    pm.expect(jsonData.last_name).to.be.a('string');",
+									"    pm.expect(jsonData.user_type).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/profile/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"profile",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains updated user profile data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.first_name).to.eql(\"UpdatedFirstName\");",
+									"    pm.expect(jsonData.last_name).to.eql(\"UpdatedLastName\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"UpdatedFirstName\",\n    \"last_name\": \"UpdatedLastName\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/profile/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"profile",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Password Reset",
+			"item": [
+				{
+					"name": "Request Password Reset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response indicates password reset email sent\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"Password reset email has been sent\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{user_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/password-reset/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"password-reset",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set New Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response indicates password has been reset\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"Password has been reset successfully\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"newPassword123\",\n    \"token\": \"{{reset_token}}\",\n    \"uidb64\": \"{{uidb64}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/password-reset-confirm/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"password-reset-confirm",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Email Verification",
+			"item": [
+				{
+					"name": "Verify Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response indicates email was verified\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"Email successfully verified\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/verify-email/{{verification_token}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"verify-email",
+								"{{verification_token}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

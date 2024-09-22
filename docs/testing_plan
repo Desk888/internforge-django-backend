@@ -1,0 +1,129 @@
+
+1. User Management:
+   1. Register User
+   2. Login
+   3. Refresh Token
+
+2. User Profile:
+   1. Get User Profile
+   2. Update User Profile
+
+3. Company:
+   1. Create Company
+   2. Get Companies
+
+4. Jobs:
+   1. Create Job
+   2. Get Jobs
+   3. Get Job by ID
+   4. Search Jobs
+
+5. Applications:
+   1. Apply for Job
+   2. Get Applications
+
+6. CV Management:
+   1. Upload CV
+   2. Get CVs
+   3. Set CV as Active
+
+7. Skills:
+   1. Add Skill
+   2. Get Skills
+
+8. Notifications:
+   1. Get Notifications
+   2. Mark Notification as Read
+
+9. Dashboard:
+   1. Get Job Seeker Dashboard
+   2. Get Employer Dashboard
+   3. Get Admin Dashboard
+
+10. Analytics:
+    1. Get Analytics Summary
+
+11. Password Reset:
+    1. Request Password Reset
+    2. Set New Password
+
+12. Email Verification:
+    1. Verify Email
+
+Step-by-step process:
+
+1. Set up your environment:
+   - Open Postman and create a new environment.
+   - Add variables: `base_url`, `user_email`, `user_password`.
+   - Set `base_url` to your API's base URL (e.g., `http://localhost:8000` for local testing).
+   - Set `user_email` and `user_password` to values you'll use for testing.
+
+2. Import the Postman collection:
+   - In Postman, click "Import" and paste the JSON content of the collection.
+
+3. Run the tests in sequence:
+
+   a. User Management:
+      - Run "Register User" test. This will create a new user account.
+      - Run "Login" test. This will authenticate the user and set `access_token` and `refresh_token`.
+      - Run "Refresh Token" test to ensure token refresh works.
+
+   b. User Profile:
+      - Run "Get User Profile" to retrieve the user's profile.
+      - Run "Update User Profile" to modify some user details.
+
+   c. Company:
+      - Run "Create Company" to set up a company for the user.
+      - Run "Get Companies" to verify the company was created.
+
+   d. Jobs:
+      - Run "Create Job" to post a new job. This will set the `job_id` variable.
+      - Run "Get Jobs" to list all jobs.
+      - Run "Get Job by ID" to retrieve the specific job created.
+      - Run "Search Jobs" to test the search functionality.
+
+   e. Applications:
+      - Run "Apply for Job" to submit an application for the created job.
+      - Run "Get Applications" to list all applications.
+
+   f. CV Management:
+      - Run "Upload CV" to add a CV to the user's profile.
+      - Run "Get CVs" to list all CVs for the user.
+      - Run "Set CV as Active" to mark a CV as the active one.
+
+   g. Skills:
+      - Run "Add Skill" to create a new skill.
+      - Run "Get Skills" to list all skills.
+
+   h. Notifications:
+      - Run "Get Notifications" to list all notifications.
+      - If there are notifications, run "Mark Notification as Read" for one of them.
+
+   i. Dashboard:
+      - Run "Get Job Seeker Dashboard" to view the job seeker's dashboard.
+      - Switch to an employer account (you may need to create one) and run "Get Employer Dashboard".
+      - Switch to an admin account (you may need to create one) and run "Get Admin Dashboard".
+
+   j. Analytics:
+      - Run "Get Analytics Summary" to view overall analytics data.
+
+   k. Password Reset:
+      - Run "Request Password Reset". This will trigger a password reset email.
+      - Check the email (or your API logs in development) for the reset token and uidb64.
+      - Set the `reset_token` and `uidb64` variables in your Postman environment.
+      - Run "Set New Password" to complete the password reset process.
+
+   l. Email Verification:
+      - If your "Register User" test didn't automatically verify the email:
+        - Check the verification email (or your API logs) for the verification token.
+        - Set the `verification_token` variable in your Postman environment.
+        - Run "Verify Email" to confirm the user's email address.
+
+4. After running all tests:
+   - Review the results in Postman.
+   - Check for any failed tests and investigate the reasons.
+   - Verify that all functionalities are working as expected.
+
+Remember to handle any errors you encounter along the way. Some tests may fail if certain conditions aren't met (e.g., trying to get an employer dashboard with a job seeker account). Adjust your approach as needed based on your specific implementation and data.
+
+This sequence ensures that each test has the necessary prerequisites. It creates a user, a company, jobs, and applications, allowing you to test all aspects of the system. Always ensure your testing environment is in a known state before starting, and consider resetting the database between full test runs for consistent results.
